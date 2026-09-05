@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>KrishMitra — your farming companion</title>
+<meta name="description" content="KrishMitra: personalized crop, soil and farm guidance in your own language." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-950:#14231a;
+    --soil-900:#1b3226;
+    --soil-800:#22432f;
+    --soil-700:#2d5a3f;
+    --leaf-500:#5fbf73;
+    --leaf-400:#7fd191;
+    --clay-600:#b5652d;
+    --clay-500:#c97b3f;
+    --mustard-500:#d9a441;
+    --cream-100:#faf7ef;
+    --cream-200:#f2ecdc;
+    --cream-300:#e8dfc6;
+    --ink-900:#17211a;
+    --ink-600:#48594e;
+    --ink-400:#7a8a7d;
+    --line:#dcd3ba;
+    --danger:#a13a2e;
+    --on-dark:#faf7ef;
+    --radius-sm:6px;
+    --radius-md:12px;
+    --radius-lg:22px;
+    --shadow-soft:0 10px 30px -14px rgba(20,35,26,0.35);
+    --font-display:'Fraunces', serif;
+    --font-body:'Work Sans', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:var(--cream-100);
+    color:var(--ink-900);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  #root{min-height:100vh;display:flex;flex-direction:column;}
+  a,button,input,select,textarea{font-family:inherit;}
+  button{cursor:pointer;}
+  h1,h2,h3{font-family:var(--font-display);margin:0;line-height:1.08;font-weight:600;color:var(--soil-950);}
+  p{margin:0;line-height:1.55;}
+  .muted{color:var(--ink-600);}
+
+  /* ---------- Splash ---------- */
+  .splash{
+    position:fixed;inset:0;z-index:200;
+    background:radial-gradient(120% 120% at 20% 0%, var(--soil-800) 0%, var(--soil-950) 65%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    animation:splashOut .5s ease 2.1s forwards;
+  }
+  @keyframes splashOut{to{opacity:0;visibility:hidden;}}
+  .splash-logo{animation:riseIn .7s ease both;}
+  @keyframes riseIn{from{opacity:0;transform:translateY(10px) scale(.92);}to{opacity:1;transform:none;}}
+  .splash-name{font-family:var(--font-display);font-size:30px;color:var(--on-dark);letter-spacing:.01em;animation:riseIn .7s ease .12s both;}
+  .splash-tag{color:#b9c9bb;font-size:14px;animation:riseIn .7s ease .22s both;}
+  .splash-dots{display:flex;gap:6px;margin-top:6px;}
+  .splash-dots span{width:6px;height:6px;border-radius:50%;background:var(--leaf-400);animation:dotPulse 1.1s ease infinite;}
+  .splash-dots span:nth-child(2){animation-delay:.15s;}
+  .splash-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes dotPulse{0%,80%,100%{opacity:.25;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
+
+  /* ---------- Header / nav ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;background:var(--soil-950);color:var(--on-dark);
+    position:sticky;top:0;z-index:40;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:19px;font-weight:600;letter-spacing:.01em;}
+  .icon-btn{
+    background:transparent;border:1px solid rgba(250,247,239,.22);color:var(--on-dark);
+    width:38px;height:38px;border-radius:10px;font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{background:rgba(250,247,239,.08);}
+  .header-actions{display:flex;align-items:center;gap:10px;}
+  .pill-btn{
+    background:transparent;border:1px solid rgba(250,247,239,.28);color:var(--on-dark);
+    padding:7px 14px;border-radius:999px;font-size:13px;font-weight:500;
+  }
+  .pill-btn:hover{background:rgba(250,247,239,.1);}
+
+  nav.drawer{
+    position:fixed;inset:0 auto 0 0;width:min(78vw,300px);z-index:60;
+    background:var(--soil-900);color:var(--on-dark);
+    padding:22px 18px;display:flex;flex-direction:column;gap:4px;
+    transform:translateX(-105%);transition:transform .28s cubic-bezier(.2,.8,.3,1);
+    box-shadow:20px 0 50px -20px rgba(0,0,0,.5);
+  }
+  nav.drawer.open{transform:translateX(0);}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(15,20,16,.45);z-index:55;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .drawer-scrim.show{opacity:1;pointer-events:auto;}
+  nav.drawer .brand{margin-bottom:18px;color:var(--on-dark);}
+  nav.drawer button{
+    text-align:left;background:transparent;border:0;color:#dbe6dd;
+    padding:12px 10px;border-radius:10px;font-size:15px;
+  }
+  nav.drawer button:hover{background:rgba(250,247,239,.08);color:#fff;}
+  nav.drawer button.active{background:rgba(95,191,115,.16);color:var(--leaf-400);font-weight:600;}
+  nav.drawer .drawer-foot{margin-top:auto;padding-top:14px;border-top:1px solid rgba(250,247,239,.14);font-size:12px;color:#8fa093;}
+
+  /* ---------- Layout shells ---------- */
+  main{flex:1;display:flex;flex-direction:column;}
+  .screen-enter{animation:fadeUp .38s ease both;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  /* Hero */
+  .hero{
+    max-width:640px;margin:0 auto;padding:56px 22px 40px;text-align:left;width:100%;
+  }
+  .eyebrow-pill{
+    display:inline-block;background:var(--cream-200);border:1px solid var(--line);
+    color:var(--soil-700);font-size:12px;font-weight:600;letter-spacing:.03em;
+    padding:6px 12px;border-radius:999px;margin-bottom:18px;
+  }
+  .hero h1{font-size:clamp(30px,5vw,46px);margin-bottom:14px;}
+  .hero p.lead{font-size:17px;color:var(--ink-600);max-width:50ch;margin-bottom:26px;}
+  .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:38px;}
+  .btn{
+    border:0;border-radius:999px;padding:13px 24px;font-size:15px;font-weight:600;
+    display:inline-flex;align-items:center;gap:8px;transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn.primary{background:var(--soil-950);color:var(--on-dark);}
+  .btn.primary:hover{box-shadow:var(--shadow-soft);}
+  .btn.secondary{background:transparent;color:var(--soil-950);border:1.5px solid var(--soil-950);}
+  .btn.secondary:hover{background:var(--cream-200);}
+  .btn.full{width:100%;justify-content:center;}
+  .btn.ghost{background:transparent;color:var(--soil-700);text-decoration:underline;padding:8px 4px;}
+  .btn[disabled]{opacity:.55;pointer-events:none;}
+
+  .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+  .feature-card{
+    background:var(--cream-200);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:16px 16px;
+  }
+  .feature-card b{display:block;font-family:var(--font-display);font-size:16px;margin-bottom:4px;color:var(--soil-950);}
+  .feature-card p{font-size:13.5px;color:var(--ink-600);}
+
+  /* Panels (auth / onboarding / vision / soil) */
+  .panel{max-width:520px;margin:0 auto;padding:44px 22px 60px;width:100%;}
+  .panel h2{font-size:26px;margin-bottom:8px;}
+  .panel .subtitle{color:var(--ink-600);margin-bottom:26px;font-size:14.5px;}
+  label.field{display:block;margin-bottom:16px;font-size:13.5px;font-weight:600;color:var(--soil-800);}
+  label.field .req{color:var(--clay-600);}
+  input[type=text],input[type=tel],input[type=number],input[type=date],select,textarea{
+    display:block;width:100%;margin-top:7px;padding:12px 13px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--line);background:#fff;font-size:15px;color:var(--ink-900);font-weight:400;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--leaf-500);outline-offset:1px;border-color:var(--leaf-500);}
+  .error-box{
+    background:#fbeae6;border:1px solid #eec3ba;color:var(--danger);
+    padding:10px 13px;border-radius:var(--radius-sm);font-size:13.5px;margin-bottom:16px;
+  }
+  .notice-box{
+    background:#eaf3ea;border:1px solid #c8dfc9;color:var(--soil-700);
+    padding:10px 13px;border-radius:var(--radius-sm);font-size:13.5px;margin-bottom:16px;
+  }
+  .form-actions{display:flex;gap:10px;margin-top:22px;}
+  .locate-btn{
+    display:flex;align-items:center;gap:8px;width:100%;justify-content:center;
+    background:var(--cream-200);border:1.5px dashed var(--line);color:var(--soil-800);
+    padding:12px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;margin-bottom:18px;
+  }
+  .progress{font-size:12.5px;color:var(--ink-600);font-weight:600;margin-bottom:18px;}
+  .progress .bar{margin-top:7px;height:5px;background:var(--cream-300);border-radius:999px;overflow:hidden;}
+  .progress .bar i{display:block;height:100%;background:var(--leaf-500);transition:width .3s ease;}
+
+  /* Dashboard */
+  .dashboard{max-width:640px;margin:0 auto;padding:36px 22px 60px;width:100%;}
+  .demo-tag{
+    background:var(--mustard-500);color:var(--soil-950);font-size:12px;font-weight:700;
+    letter-spacing:.03em;padding:6px 12px;border-radius:999px;display:inline-block;margin-bottom:16px;
+  }
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--clay-600);margin-bottom:4px;}
+  .dashboard h2{font-size:27px;margin-bottom:4px;}
+  .dashboard .loc{margin-bottom:22px;}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+  .stat-grid .feature-card p{font-size:14px;color:var(--soil-950);font-weight:500;}
+  .dash-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .dash-actions .btn{flex:1;min-width:170px;}
+  .soil-bar{
+    width:100%;display:flex;align-items:center;gap:14px;text-align:left;
+    background:var(--soil-950);color:var(--on-dark);border:0;border-radius:var(--radius-lg);
+    padding:16px 18px;margin-top:6px;
+  }
+  .soil-bar:hover{background:var(--soil-900);}
+  .soil-icon{font-size:26px;}
+  .soil-bar b{display:block;font-family:var(--font-display);font-size:16px;font-weight:600;}
+  .soil-bar small{color:#b9c9bb;font-size:12.5px;}
+  .soil-arrow{margin-left:auto;font-size:18px;}
+
+  /* Chat */
+  .talk{max-width:600px;margin:0 auto;padding:30px 18px 0;width:100%;display:flex;flex-direction:column;height:calc(100vh - 60px);}
+  .talk h2{font-size:23px;}
+  .talk .subtitle{margin-bottom:14px;}
+  .chat{flex:1;overflow-y:auto;padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px;}
+  .chat .empty{color:var(--ink-400);font-size:14px;text-align:center;margin-top:40px;}
+  .bubble{max-width:82%;padding:11px 15px;border-radius:16px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;}
+  .bubble.user{align-self:flex-end;background:var(--soil-950);color:var(--on-dark);border-bottom-right-radius:4px;}
+  .bubble.assistant{align-self:flex-start;background:var(--cream-200);border:1px solid var(--line);border-bottom-left-radius:4px;}
+  .composer{
+    display:flex;gap:8px;padding:12px 2px 18px;border-top:1px solid var(--line);
+    position:sticky;bottom:0;background:var(--cream-100);
+  }
+  .composer input{flex:1;margin:0;}
+  .composer button.mic{
+    background:var(--cream-200);border:1.5px solid var(--line);border-radius:50%;
+    width:44px;height:44px;font-size:16px;flex:none;
+  }
+  .composer button.mic.recording{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .composer .btn.primary{border-radius:50%;width:44px;height:44px;padding:0;flex:none;}
+
+  /* Vision / soil */
+  .upload-box{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    border:2px dashed var(--line);border-radius:var(--radius-md);padding:30px 16px;
+    text-align:center;cursor:pointer;background:var(--cream-200);margin-bottom:14px;
+  }
+  .upload-box:hover{border-color:var(--leaf-500);}
+  .upload-box .icon{font-size:30px;}
+  .upload-box input{display:none;}
+  .file-name{font-size:13.5px;color:var(--ink-600);margin-bottom:12px;}
+  .result-box{
+    margin-top:18px;background:var(--cream-200);border:1px solid var(--line);
+    border-radius:var(--radius-md);padding:16px 17px;font-size:14.5px;line-height:1.6;white-space:pre-wrap;
+  }
+  .result-box b{display:block;font-family:var(--font-display);margin-bottom:8px;color:var(--soil-950);}
+  .disclaimer{font-size:12.5px;color:var(--ink-400);margin-top:14px;}
+  .soil-heading{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
+  .soil-heading .icon.large{font-size:30px;}
+
+  /* Treatment method boxes (pesticide / organic / combined) */
+  .method-stack{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+  .method-box{
+    border-radius:var(--radius-md);padding:16px 17px;font-size:14.5px;line-height:1.6;
+    border:1px solid var(--line);border-left-width:5px;background:var(--cream-200);
+  }
+  .method-box .method-title{
+    display:flex;align-items:center;gap:8px;font-family:var(--font-display);
+    font-size:15.5px;font-weight:600;margin-bottom:8px;color:var(--soil-950);
+  }
+  .method-box .method-tag{
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:3px 8px;border-radius:999px;color:#fff;
+  }
+  .method-box.pesticide{border-left-color:var(--clay-600);}
+  .method-box.pesticide .method-tag{background:var(--clay-600);}
+  .method-box.organic{border-left-color:var(--leaf-500);}
+  .method-box.organic .method-tag{background:var(--soil-700);}
+  .method-box.combined{border-left-color:var(--mustard-500);}
+  .method-box.combined .method-tag{background:#8a6a17;}
+  .method-box .method-body{white-space:pre-wrap;}
+
+  /* Expert page */
+  .expert-card{
+    background:var(--cream-200);border:1px solid var(--line);border-radius:var(--radius-md);
+    padding:18px 18px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start;
+  }
+  .expert-avatar{
+    width:46px;height:46px;border-radius:50%;background:var(--soil-950);color:var(--on-dark);
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-display);
+    font-size:17px;font-weight:600;flex:none;
+  }
+  .expert-card b{display:block;font-family:var(--font-display);font-size:16.5px;color:var(--soil-950);}
+  .expert-role{font-size:12.5px;color:var(--clay-600);font-weight:600;margin:2px 0 6px;}
+  .expert-focus{font-size:13.5px;color:var(--ink-600);margin-bottom:8px;}
+  .expert-contact{display:flex;flex-wrap:wrap;gap:8px;}
+  .expert-contact a{
+    font-size:13px;font-weight:600;color:var(--soil-800);text-decoration:none;
+    background:#fff;border:1px solid var(--line);padding:6px 11px;border-radius:999px;
+  }
+  .expert-contact a:hover{background:var(--cream-300);}
+  .helpline-card{
+    background:var(--soil-950);color:var(--on-dark);border-radius:var(--radius-lg);
+    padding:18px 20px;margin-bottom:18px;
+  }
+  .helpline-card b{display:block;font-family:var(--font-display);font-size:16px;margin-bottom:4px;color:var(--on-dark);}
+  .helpline-card p{font-size:13.5px;color:#cfe0d0;}
+  .helpline-card a{color:var(--leaf-400);font-weight:700;text-decoration:none;}
+  .expert-note{font-size:12.5px;color:var(--ink-400);margin-top:4px;margin-bottom:18px;}
+
+  /* Settings modal (API key) */
+  .modal-scrim{position:fixed;inset:0;background:rgba(15,20,16,.5);z-index:90;display:flex;align-items:flex-end;justify-content:center;}
+  @media(min-width:640px){.modal-scrim{align-items:center;}}
+  .modal{
+    background:#fff;border-radius:20px 20px 0 0;padding:26px 22px 30px;width:100%;max-width:460px;
+    max-height:88vh;overflow:auto;
+  }
+  @media(min-width:640px){.modal{border-radius:20px;}}
+  .modal h3{font-size:19px;margin-bottom:6px;}
+  .modal .subtitle{margin-bottom:18px;}
+  .key-note{
+    background:#fbf3e4;border:1px solid #ecdcb0;color:#7a5a12;font-size:12.5px;
+    padding:10px 12px;border-radius:var(--radius-sm);margin-top:14px;line-height:1.5;
+  }
+
+  .footer-space{height:8px;}
+  @media(max-width:480px){
+    .hero,.panel,.dashboard{padding-left:18px;padding-right:18px;}
+  }
+
+  /* ---------- Dark mode ---------- */
+  :root[data-theme="dark"]{
+    --cream-100:#12160f;
+    --cream-200:#1b2117;
+    --cream-300:#232b1d;
+    --ink-900:#eef0e6;
+    --ink-600:#b7c0ac;
+    --ink-400:#8a9280;
+    --line:#333c2b;
+  }
+  :root[data-theme="dark"] body{background:var(--cream-100);color:var(--ink-900);}
+  :root[data-theme="dark"] input[type=text],
+  :root[data-theme="dark"] input[type=tel],
+  :root[data-theme="dark"] input[type=number],
+  :root[data-theme="dark"] input[type=date],
+  :root[data-theme="dark"] select,
+  :root[data-theme="dark"] textarea{background:#1b2117;color:var(--ink-900);border-color:var(--line);}
+  :root[data-theme="dark"] .error-box{background:#3a201c;border-color:#5a3128;color:#ff9d8a;}
+  :root[data-theme="dark"] .notice-box{background:#1e2c1e;border-color:#33502f;color:#a8d6a8;}
+  :root[data-theme="dark"] .key-note{background:#332c17;border-color:#5a4a1f;color:#e0c477;}
+  :root[data-theme="dark"] .modal{background:#1b2117;color:var(--ink-900);}
+  :root[data-theme="dark"] .bubble.assistant{background:var(--cream-200);border-color:var(--line);color:var(--ink-900);}
+  /* Headings and labels used var(--soil-950/800/700) — dark green — which is fine on the
+     light cream surfaces, but those same surfaces turn dark in dark mode, so this text
+     needs to switch to a light color too, or it disappears. */
+  :root[data-theme="dark"] h1,
+  :root[data-theme="dark"] h2,
+  :root[data-theme="dark"] h3,
+  :root[data-theme="dark"] .feature-card b,
+  :root[data-theme="dark"] .result-box b,
+  :root[data-theme="dark"] .stat-grid .feature-card p,
+  :root[data-theme="dark"] label.field,
+  :root[data-theme="dark"] .locate-btn{color:var(--ink-900);}
+  :root[data-theme="dark"] .btn.secondary{color:var(--ink-900);border-color:var(--ink-600);}
+  :root[data-theme="dark"] .btn.ghost,
+  :root[data-theme="dark"] .eyebrow-pill{color:var(--leaf-400);}
+  .theme-toggle{font-size:16px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- constants ---------------- */
+  var LANGUAGES = ["English","Telugu","Hindi","Tamil","Kannada","Malayalam","Marathi","Bengali","Gujarati","Punjabi","Odia","Assamese","Urdu"];
+  var SPEECH_LANG_CODES = {
+    "English":"en-IN","Telugu":"te-IN","Hindi":"hi-IN","Tamil":"ta-IN","Kannada":"kn-IN",
+    "Malayalam":"ml-IN","Marathi":"mr-IN","Bengali":"bn-IN","Gujarati":"gu-IN","Punjabi":"pa-IN",
+    "Odia":"or-IN","Assamese":"as-IN","Urdu":"ur-IN"
+  };
+  var STAGES = ["Seedling","Vegetative","Flowering","Fruiting","Maturity","Harvest","Other"];
+  var CROPS = ["Cotton","Turmeric","Chilli (Mirchi)","Rice","Wheat","Maize","Groundnut","Sugarcane","Soybean","Pigeon pea (Toor dal)","Chickpea (Chana)","Tomato","Onion","Potato","Banana","Mango","Other"];
+  var BLANK_FARMER = {name:"",age:"",language:"",userType:"Farmer",state:"",district:"",mandal:"",village:"",pin:"",farmSize:"",unit:"acres",irrigation:"",water:"",soil:"",crop:"",growthStage:"",plantingDate:"",previousCrop:"",onboardingComplete:false};
+  var DEMO_FARMER = {name:"Ramesh",age:"41",language:"Telugu",userType:"Farmer",state:"Telangana",district:"Nizamabad",mandal:"Demo Mandal",village:"Demo Village",pin:"503001",farmSize:"5",unit:"acres",irrigation:"Borewell",water:"Moderate",soil:"Black soil",crop:"Cotton",growthStage:"Vegetative",plantingDate:"",previousCrop:"",onboardingComplete:true};
+
+  /* Sample expert directory \u2014 demo/placeholder profiles. Replace with your verified,
+     locally-empanelled agricultural experts before going live. */
+  var EXPERTS = [
+    {
+      name:"Dr. Ananya Rao",
+      role:"Senior Agronomist \u00b7 State Agricultural University",
+      focus:"Crop nutrition, pest identification and integrated pest management.",
+      phone:"+91 98765 43210",
+      email:"ananya.rao@agriexperts.example.in"
+    },
+    {
+      name:"Suresh Patil",
+      role:"Soil Health Specialist \u00b7 Krishi Vigyan Kendra (KVK)",
+      focus:"Soil testing, fertility management and organic amendments.",
+      phone:"+91 91234 56789",
+      email:"suresh.patil@agriexperts.example.in"
+    },
+    {
+      name:"Dr. Priya Nair",
+      role:"Plant Pathologist",
+      focus:"Disease diagnosis, fungicide guidance and organic disease control.",
+      phone:"+91 99887 66554",
+      email:"priya.nair@agriexperts.example.in"
+    }
+  ];
+
+  var INDIA_STATES = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi","Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"];
+
+  var STATE_DISTRICTS = {
+    "Andhra Pradesh":["Alluri Sitharama Raju","Anakapalli","Anantapur","Annamayya","Bapatla","Chittoor","East Godavari","Eluru","Guntur","Kakinada","Konaseema","Krishna","Kurnool","Nandyal","NTR","Palnadu","Parvathipuram Manyam","Prakasam","Srikakulam","Sri Sathya Sai","Tirupati","Visakhapatnam","Vizianagaram","West Godavari","YSR Kadapa"],
+    "Arunachal Pradesh":["Tawang","West Kameng","East Kameng","Papum Pare","Kurung Kumey","Kra Daadi","Lower Subansiri","Upper Subansiri","West Siang","East Siang","Siang","Upper Siang","Lower Siang","Lower Dibang Valley","Dibang Valley","Anjaw","Lohit","Namsai","Changlang","Tirap","Longding"],
+    "Assam":["Baksa","Barpeta","Biswanath","Bongaigaon","Cachar","Charaideo","Chirang","Darrang","Dhemaji","Dhubri","Dibrugarh","Goalpara","Golaghat","Hailakandi","Hojai","Jorhat","Kamrup","Kamrup Metropolitan","Karbi Anglong","Karimganj","Kokrajhar","Lakhimpur","Majuli","Morigaon","Nagaon","Nalbari","Dima Hasao","Sivasagar","Sonitpur","South Salmara-Mankachar","Tinsukia","Udalguri","West Karbi Anglong"],
+    "Bihar":["Araria","Arwal","Aurangabad","Banka","Begusarai","Bhagalpur","Bhojpur","Buxar","Darbhanga","East Champaran","Gaya","Gopalganj","Jamui","Jehanabad","Kaimur","Katihar","Khagaria","Kishanganj","Lakhisarai","Madhepura","Madhubani","Munger","Muzaffarpur","Nalanda","Nawada","Patna","Purnia","Rohtas","Saharsa","Samastipur","Saran","Sheikhpura","Sheohar","Sitamarhi","Siwan","Supaul","Vaishali","West Champaran"],
+    "Chhattisgarh":["Balod","Baloda Bazar","Balrampur","Bastar","Bemetara","Bijapur","Bilaspur","Dantewada","Dhamtari","Durg","Gariaband","Gaurela-Pendra-Marwahi","Janjgir-Champa","Jashpur","Kabirdham","Kanker","Kondagaon","Korba","Koriya","Mahasamund","Mungeli","Narayanpur","Raigarh","Raipur","Rajnandgaon","Sukma","Surajpur","Surguja"],
+    "Goa":["North Goa","South Goa"],
+    "Gujarat":["Ahmedabad","Amreli","Anand","Aravalli","Banaskantha","Bharuch","Bhavnagar","Botad","Chhota Udaipur","Dahod","Dang","Devbhoomi Dwarka","Gandhinagar","Gir Somnath","Jamnagar","Junagadh","Kheda","Kutch","Mahisagar","Mehsana","Morbi","Narmada","Navsari","Panchmahal","Patan","Porbandar","Rajkot","Sabarkantha","Surat","Surendranagar","Tapi","Vadodara","Valsad"],
+    "Haryana":["Ambala","Bhiwani","Charkhi Dadri","Faridabad","Fatehabad","Gurugram","Hisar","Jhajjar","Jind","Kaithal","Karnal","Kurukshetra","Mahendragarh","Nuh","Palwal","Panchkula","Panipat","Rewari","Rohtak","Sirsa","Sonipat","Yamunanagar"],
+    "Himachal Pradesh":["Bilaspur","Chamba","Hamirpur","Kangra","Kinnaur","Kullu","Lahaul and Spiti","Mandi","Shimla","Sirmaur","Solan","Una"],
+    "Jharkhand":["Bokaro","Chatra","Deoghar","Dhanbad","Dumka","East Singhbhum","Garhwa","Giridih","Godda","Gumla","Hazaribagh","Jamtara","Khunti","Koderma","Latehar","Lohardaga","Pakur","Palamu","Ramgarh","Ranchi","Sahebganj","Seraikela Kharsawan","Simdega","West Singhbhum"],
+    "Karnataka":["Bagalkot","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar","Chamarajanagar","Chikballapur","Chikkamagaluru","Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"],
+    "Kerala":["Alappuzha","Ernakulam","Idukki","Kannur","Kasaragod","Kollam","Kottayam","Kozhikode","Malappuram","Palakkad","Pathanamthitta","Thiruvananthapuram","Thrissur","Wayanad"],
+    "Madhya Pradesh":["Agar Malwa","Alirajpur","Anuppur","Ashoknagar","Balaghat","Barwani","Betul","Bhind","Bhopal","Burhanpur","Chhatarpur","Chhindwara","Damoh","Datia","Dewas","Dhar","Dindori","Guna","Gwalior","Harda","Hoshangabad","Indore","Jabalpur","Jhabua","Katni","Khandwa","Khargone","Mandla","Mandsaur","Morena","Narsinghpur","Neemuch","Panna","Raisen","Rajgarh","Ratlam","Rewa","Sagar","Satna","Sehore","Seoni","Shahdol","Shajapur","Sheopur","Shivpuri","Sidhi","Singrauli","Tikamgarh","Ujjain","Umaria","Vidisha"],
+    "Maharashtra":["Ahmednagar","Akola","Amravati","Aurangabad","Beed","Bhandara","Buldhana","Chandrapur","Dhule","Gadchiroli","Gondia","Hingoli","Jalgaon","Jalna","Kolhapur","Latur","Mumbai City","Mumbai Suburban","Nagpur","Nanded","Nandurbar","Nashik","Osmanabad","Palghar","Parbhani","Pune","Raigad","Ratnagiri","Sangli","Satara","Sindhudurg","Solapur","Thane","Wardha","Washim","Yavatmal"],
+    "Manipur":["Bishnupur","Chandel","Churachandpur","Imphal East","Imphal West","Jiribam","Kakching","Kamjong","Kangpokpi","Noney","Pherzawl","Senapati","Tamenglong","Tengnoupal","Thoubal","Ukhrul"],
+    "Meghalaya":["East Garo Hills","East Jaintia Hills","East Khasi Hills","North Garo Hills","Ri Bhoi","South Garo Hills","South West Garo Hills","South West Khasi Hills","West Garo Hills","West Jaintia Hills","West Khasi Hills"],
+    "Mizoram":["Aizawl","Champhai","Hnahthial","Khawzawl","Kolasib","Lawngtlai","Lunglei","Mamit","Saiha","Saitual","Serchhip"],
+    "Nagaland":["Dimapur","Kiphire","Kohima","Longleng","Mokokchung","Mon","Noklak","Peren","Phek","Tuensang","Wokha","Zunheboto"],
+    "Odisha":["Angul","Balangir","Balasore","Bargarh","Bhadrak","Boudh","Cuttack","Deogarh","Dhenkanal","Gajapati","Ganjam","Jagatsinghpur","Jajpur","Jharsuguda","Kalahandi","Kandhamal","Kendrapara","Kendujhar","Khordha","Koraput","Malkangiri","Mayurbhanj","Nabarangpur","Nayagarh","Nuapada","Puri","Rayagada","Sambalpur","Subarnapur","Sundargarh"],
+    "Punjab":["Amritsar","Barnala","Bathinda","Faridkot","Fatehgarh Sahib","Fazilka","Ferozepur","Gurdaspur","Hoshiarpur","Jalandhar","Kapurthala","Ludhiana","Malerkotla","Mansa","Moga","Muktsar","Pathankot","Patiala","Rupnagar","Sangrur","SAS Nagar (Mohali)","Shaheed Bhagat Singh Nagar","Tarn Taran"],
+    "Rajasthan":["Ajmer","Alwar","Banswara","Baran","Barmer","Bharatpur","Bhilwara","Bikaner","Bundi","Chittorgarh","Churu","Dausa","Dholpur","Dungarpur","Hanumangarh","Jaipur","Jaisalmer","Jalore","Jhalawar","Jhunjhunu","Jodhpur","Karauli","Kota","Nagaur","Pali","Pratapgarh","Rajsamand","Sawai Madhopur","Sikar","Sirohi","Sri Ganganagar","Tonk","Udaipur"],
+    "Sikkim":["East Sikkim","North Sikkim","South Sikkim","West Sikkim"],
+    "Tamil Nadu":["Ariyalur","Chengalpattu","Chennai","Coimbatore","Cuddalore","Dharmapuri","Dindigul","Erode","Kallakurichi","Kanchipuram","Kanyakumari","Karur","Krishnagiri","Madurai","Mayiladuthurai","Nagapattinam","Namakkal","Nilgiris","Perambalur","Pudukkottai","Ramanathapuram","Ranipet","Salem","Sivaganga","Tenkasi","Thanjavur","Theni","Thoothukudi","Tiruchirappalli","Tirunelveli","Tirupathur","Tiruppur","Tiruvallur","Tiruvannamalai","Tiruvarur","Vellore","Viluppuram","Virudhunagar"],
+    "Telangana":["Adilabad","Bhadradri Kothagudem","Hanumakonda","Hyderabad","Jagtial","Jangaon","Jayashankar Bhupalpally","Jogulamba Gadwal","Kamareddy","Karimnagar","Khammam","Komaram Bheem Asifabad","Mahabubabad","Mahabubnagar","Mancherial","Medak","Medchal-Malkajgiri","Mulugu","Nagarkurnool","Nalgonda","Narayanpet","Nirmal","Nizamabad","Peddapalli","Rajanna Sircilla","Rangareddy","Sangareddy","Siddipet","Suryapet","Vikarabad","Wanaparthy","Warangal","Yadadri Bhuvanagiri"],
+    "Tripura":["Dhalai","Gomati","Khowai","North Tripura","Sepahijala","South Tripura","Unakoti","West Tripura"],
+    "Uttar Pradesh":["Agra","Aligarh","Ambedkar Nagar","Amethi","Amroha","Auraiya","Ayodhya","Azamgarh","Baghpat","Bahraich","Ballia","Balrampur","Banda","Barabanki","Bareilly","Basti","Bhadohi","Bijnor","Budaun","Bulandshahr","Chandauli","Chitrakoot","Deoria","Etah","Etawah","Farrukhabad","Fatehpur","Firozabad","Gautam Buddha Nagar","Ghaziabad","Ghazipur","Gonda","Gorakhpur","Hamirpur","Hapur","Hardoi","Hathras","Jalaun","Jaunpur","Jhansi","Kannauj","Kanpur Dehat","Kanpur Nagar","Kasganj","Kaushambi","Kushinagar","Lakhimpur Kheri","Lalitpur","Lucknow","Maharajganj","Mahoba","Mainpuri","Mathura","Mau","Meerut","Mirzapur","Moradabad","Muzaffarnagar","Pilibhit","Pratapgarh","Prayagraj","Raebareli","Rampur","Saharanpur","Sambhal","Sant Kabir Nagar","Shahjahanpur","Shamli","Shravasti","Siddharthnagar","Sitapur","Sonbhadra","Sultanpur","Unnao","Varanasi"],
+    "Uttarakhand":["Almora","Bageshwar","Chamoli","Champawat","Dehradun","Haridwar","Nainital","Pauri Garhwal","Pithoragarh","Rudraprayag","Tehri Garhwal","Udham Singh Nagar","Uttarkashi"],
+    "West Bengal":["Alipurduar","Bankura","Birbhum","Cooch Behar","Dakshin Dinajpur","Darjeeling","Hooghly","Howrah","Jalpaiguri","Jhargram","Kalimpong","Kolkata","Malda","Murshidabad","Nadia","North 24 Parganas","Paschim Bardhaman","Paschim Medinipur","Purba Bardhaman","Purba Medinipur","Purulia","South 24 Parganas","Uttar Dinajpur"],
+    "Andaman and Nicobar Islands":["Nicobar","North and Middle Andaman","South Andaman"],
+    "Chandigarh":["Chandigarh"],
+    "Dadra and Nagar Haveli and Daman and Diu":["Dadra and Nagar Haveli","Daman","Diu"],
+    "Delhi":["Central Delhi","East Delhi","New Delhi","North Delhi","North East Delhi","North West Delhi","Shahdara","South Delhi","South East Delhi","South West Delhi","West Delhi"],
+    "Jammu and Kashmir":["Anantnag","Bandipora","Baramulla","Budgam","Doda","Ganderbal","Jammu","Kathua","Kishtwar","Kulgam","Kupwara","Poonch","Pulwama","Rajouri","Ramban","Reasi","Samba","Shopian","Srinagar","Udhampur"],
+    "Ladakh":["Kargil","Leh"],
+    "Lakshadweep":["Lakshadweep"],
+    "Puducherry":["Karaikal","Mahe","Puducherry","Yanam"]
+  };
+
+  /* ---------------- state ---------------- */
+  var state = {
+    booting:true,
+    screen:"home",
+    menuOpen:false,
+    settingsOpen:false,
+    farmer:loadFarmer(),
+    step:1,
+    notice:"",
+    loading:false,
+    demo:false,
+    chat:{msgs:[],busy:false,voice:false},
+    vision:{file:null,result:"",sections:null,busy:false,error:""},
+    soil:{file:null,result:"",busy:false,error:""},
+    weather:{loading:false,data:null,error:"",fetchedAt:0},
+    reminder:loadReminder(),
+    theme:loadTheme(),
+    apiModel:"backend-managed"
+  };
+
+  function loadFarmer(){
+    try{
+      var raw = localStorage.getItem("km_farmer_v1");
+      return raw ? JSON.parse(raw) : Object.assign({},BLANK_FARMER);
+    }catch(e){ return Object.assign({},BLANK_FARMER); }
+  }
+  function saveFarmer(){
+    try{ localStorage.setItem("km_farmer_v1", JSON.stringify(state.farmer)); }catch(e){}
+  }
+
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+  }
+  function loadReminder(){
+    try{
+      var raw = localStorage.getItem("km_reminder_v1");
+      var r = raw ? JSON.parse(raw) : null;
+      if(!r || r.date !== todayStr()) r = {date:todayStr(), status:null, postponedAt:0};
+      if(r.status==="postponed" && r.postponedAt && (Date.now()-r.postponedAt > 2*60*60*1000)){
+        r.status = null;
+      }
+      return r;
+    }catch(e){ return {date:todayStr(), status:null, postponedAt:0}; }
+  }
+  function saveReminder(){
+    try{ localStorage.setItem("km_reminder_v1", JSON.stringify(state.reminder)); }catch(e){}
+  }
+  function loadTheme(){
+    try{ return localStorage.getItem("km_theme_v1") || "light"; }catch(e){ return "light"; }
+  }
+  function saveTheme(){
+    try{ localStorage.setItem("km_theme_v1", state.theme); }catch(e){}
+  }
+  function applyTheme(){
+    document.documentElement.setAttribute("data-theme", state.theme);
+  }
+
+  var root = document.getElementById("root");
+
+  function render(){
+    applyTheme();
+    var html = "";
+    if(state.booting) html += splashHtml();
+    html += headerHtml();
+    html += drawerHtml();
+    html += "<main>" + screenHtml() + "</main>";
+    if(state.settingsOpen) html += settingsModalHtml();
+    root.innerHTML = html;
+    wireEvents();
+  }
+
+  /* ---------------- pieces ---------------- */
+  function leafLogo(size){
+    size = size||26;
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+      '<rect width="180" height="180" rx="36" fill="#14231a"/>'+
+      '<path d="M40 148C104 148 144 100 144 40C86 40 40 78 40 148Z" fill="#5fbf73"/>'+
+      '<path d="M40 148C58 110 70 90 66 56" stroke="#14231a" stroke-width="6" stroke-linecap="round"/>'+
+      '<circle cx="132" cy="52" r="9" fill="#d9a441"/>'+
+    '</svg>';
+  }
+
+  function splashHtml(){
+    return '<div class="splash">'+
+      '<div class="splash-logo">'+leafLogo(58)+'</div>'+
+      '<div class="splash-name">KrishMitra</div>'+
+      '<div class="splash-tag">Your farming companion</div>'+
+      '<div class="splash-dots"><span></span><span></span><span></span></div>'+
+    '</div>';
+  }
+
+  function headerHtml(){
+    var loggedIn = !!(state.farmer && state.farmer.name);
+    return '<header>'+
+      '<button class="icon-btn" data-action="toggle-menu" aria-label="Open menu">&#9776;</button>'+
+      '<div class="brand">'+leafLogo(24)+' KrishMitra</div>'+
+      '<div class="header-actions">'+
+        '<button class="icon-btn theme-toggle" data-action="toggle-theme" aria-label="Toggle dark mode">'+(state.theme==="dark"?"\u2600\ufe0f":"\ud83c\udf19")+'</button>'+
+        '<button class="pill-btn" data-action="open-settings">Settings</button>'+
+        (loggedIn ? '<button class="pill-btn" data-action="logout">Log out</button>' : '')+
+      '</div>'+
+    '</header>';
+  }
+
+  function drawerHtml(){
+    function item(scr,label){
+      return '<button data-action="nav" data-screen="'+scr+'" class="'+(state.screen===scr?"active":"")+'">'+label+'</button>';
+    }
+    return '<div class="drawer-scrim '+(state.menuOpen?"show":"")+'" data-action="close-menu"></div>'+
+      '<nav class="drawer '+(state.menuOpen?"open":"")+'">'+
+        '<div class="brand">'+leafLogo(22)+' KrishMitra</div>'+
+        item("dash","Home")+
+        item("talk","Talk to KrishMitra")+
+        item("vision","Crop / Soil Check")+
+        item("soil","Soil health & yield")+
+        item("expert","Talk to an Expert")+
+        item("onboard","My Farm")+
+        item("demo","Demo")+
+        '<div class="drawer-foot">AI requests run directly from this page &mdash; no backend server required.</div>'+
+      '</nav>';
+  }
+
+  function settingsModalHtml(){
+    return '<div class="modal-scrim" data-action="close-settings">'+
+      '<div class="modal" onclick="event.stopPropagation()">'+
+        '<h3>Settings</h3>'+
+        '<p class="subtitle">AI requests run directly from this page &mdash; no server, no API key to manage, and no extra cost.</p>'+
+        '<label class="field">App language (used for chat &amp; AI replies)<select id="quickLangSelect">'+optionsHtml(LANGUAGES,state.farmer.language,true)+'</select></label>'+
+        '<div class="key-note">KrishMitra always replies in this language across chat, crop/soil photo checks, and soil report analysis. You can still ask it directly to switch for a single reply, e.g. "please reply in English this time".</div>'+
+        '<div class="form-actions"><button class="btn primary full" data-action="close-settings">Done</button></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function feature(t,d){
+    return '<div class="feature-card"><b>'+t+'</b><p>'+d+'</p></div>';
+  }
+
+  function optionsHtml(list, selected, includeBlank){
+    var out = includeBlank ? '<option value="">Select</option>' : "";
+    for(var i=0;i<list.length;i++){
+      var v = list[i];
+      out += '<option value="'+escapeHtml(v)+'" '+(v===selected?"selected":"")+'>'+escapeHtml(v)+'</option>';
+    }
+    return out;
+  }
+
+  function districtOptionsHtml(stateName, selected){
+    var list = STATE_DISTRICTS[stateName] || [];
+    if(list.length===0){
+      return '<option value="">Select a state first</option>'+(selected?'<option value="'+escapeHtml(selected)+'" selected>'+escapeHtml(selected)+'</option>':"");
+    }
+    return optionsHtml(list, selected, true);
+  }
+
+  /* ---------------- screens ---------------- */
+  function screenHtml(){
+    switch(state.screen){
+      case "home": return homeHtml();
+      case "auth": return authHtml();
+      case "onboard": return onboardHtml();
+      case "dash": return dashboardHtml(state.farmer,false);
+      case "demo": return dashboardHtml(DEMO_FARMER,true);
+      case "talk": return talkHtml();
+      case "vision": return visionHtml();
+      case "soil": return soilHtml();
+      case "expert": return expertHtml();
+      default: return homeHtml();
+    }
+  }
+
+  function homeHtml(){
+    return '<div class="hero screen-enter">'+
+      '<span class="eyebrow-pill">AI + human-ready agriculture</span>'+
+      '<h1>Your farm. Your language. Your Mitra.</h1>'+
+      '<p class="lead">Personalized agricultural guidance built around your crop, locality and farm context.</p>'+
+      '<div class="actions">'+
+        '<button class="btn primary" data-action="go-auth">Get started</button>'+
+        '<button class="btn secondary" data-action="nav" data-screen="demo">Explore demo</button>'+
+      '</div>'+
+      '<div class="feature-grid">'+
+        feature("Farm context","Save your land and crop details for this session.")+
+        feature("Natural talk","Use voice or text to ask farming questions.")+
+        feature("Crop check","Send photos for an AI-assisted first look.")+
+        feature("Soil health","Upload a soil test for a maintenance and crop-fit summary.")+
+        feature("Expert support","Named experts and the Kisan Call Centre helpline, one tap away.")+
+      '</div>'+
+    '</div>';
+  }
+
+  function authHtml(){
+    return '<div class="panel screen-enter">'+
+      '<h2>Tell us your name</h2>'+
+      '<p class="subtitle">Quick demo sign-in — full authentication can be added later.</p>'+
+      '<form id="authForm">'+
+        '<label class="field">Your name<input type="text" id="authName" placeholder="e.g. Ramesh Kumar" required/></label>'+
+        (state.notice? '<div class="error-box">'+escapeHtml(state.notice)+'</div>' : '')+
+        '<button type="submit" class="btn primary full">Continue</button>'+
+      '</form>'+
+    '</div>';
+  }
+
+  function onboardHtml(){
+    var f = state.farmer, step = state.step;
+    var titles = {1:"Your convenient language",2:"About you",3:"Your locality",4:"Your farm",5:"Your crop"};
+    var body = "";
+    if(step===1){
+      body += fieldSelect("language","Which language is most convenient for you? *",f.language,LANGUAGES,true);
+    } else if(step===2){
+      body += fieldInput("name","Name *",f.name,"text");
+      body += fieldInput("age","Age *",f.age,"number");
+      body += fieldSelect("userType","I am a *",f.userType,["Farmer","Agriculture student","Gardener","Agriculture professional","Other"],false);
+    } else if(step===3){
+      body += '<button type="button" class="locate-btn" data-action="locate">Use my current location</button>';
+      body += '<label class="field">State *<select name="state" id="stateSelect">'+optionsHtml(INDIA_STATES,f.state,true)+'</select></label>';
+      body += '<label class="field">District *<select name="district" id="districtSelect">'+districtOptionsHtml(f.state,f.district)+'</select></label>';
+      body += fieldInput("mandal","Mandal / Taluk *",f.mandal,"text");
+      body += fieldInput("village","Village / Town *",f.village,"text");
+      body += fieldInput("pin","PIN code *",f.pin,"text");
+    } else if(step===4){
+      body += fieldInput("farmSize","Farm size *",f.farmSize,"text");
+      body += fieldSelect("unit","Unit",f.unit,["acres","hectares","guntas"],false);
+      body += fieldSelect("irrigation","Irrigation *",f.irrigation,["Rainfed","Drip","Sprinkler","Canal","Borewell","Other"],true);
+      body += fieldSelect("water","Water availability *",f.water,["Low","Moderate","Good","Seasonal","Unknown"],true);
+      body += fieldSelect("soil","Soil type",f.soil,["Black soil","Red soil","Sandy","Loamy","Clay","Other","Don't know"],true);
+    } else if(step===5){
+      body += fieldSelect("crop","What is your crop? *",f.crop,CROPS,true);
+      body += fieldSelect("growthStage","Growth stage *",f.growthStage,STAGES,false);
+      body += fieldInput("plantingDate","Planting date",f.plantingDate,"date");
+      body += fieldInput("previousCrop","Previous crop",f.previousCrop,"text");
+    }
+    return '<div class="panel screen-enter">'+
+      '<div class="progress">Step '+step+' of 5<div class="bar"><i style="width:'+(step*20)+'%"></i></div></div>'+
+      '<h2>'+titles[step]+'</h2>'+
+      '<p class="subtitle">Fields marked * are mandatory.</p>'+
+      '<form id="onboardForm">'+
+        body+
+        (state.notice? '<div class="error-box">'+escapeHtml(state.notice)+'</div>' : '')+
+        '<div class="form-actions">'+
+          '<button type="button" class="btn secondary" data-action="onboard-back" '+(step===1?"disabled":"")+'>Back</button>'+
+          '<button type="submit" class="btn primary" '+(state.loading?"disabled":"")+'>'+(state.loading?"Saving\u2026":(step===5?"Finish":"Continue"))+'</button>'+
+        '</div>'+
+      '</form>'+
+    '</div>';
+  }
+  function fieldInput(key,label,value,type){
+    return '<label class="field">'+label+'<input type="'+type+'" name="'+key+'" value="'+escapeHtml(value)+'"/></label>';
+  }
+  function fieldSelect(key,label,value,list,includeBlank){
+    return '<label class="field">'+label+'<select name="'+key+'">'+optionsHtml(list,value,includeBlank)+'</select></label>';
+  }
+
+  function dashboardHtml(farmer,demo){
+    var loc = farmer.village ? (farmer.village+", "+farmer.district+", "+farmer.state) : "Complete your farmer profile to personalize this.";
+    return '<div class="dashboard screen-enter">'+
+      (demo? '<div class="demo-tag">DEMO MODE \u2014 sample data only</div>' : '')+
+      '<p class="eyebrow">Good day</p>'+
+      '<h2>Namaskaram, '+escapeHtml(farmer.name||"Farmer")+' \ud83d\udc4b</h2>'+
+      '<p class="muted loc">'+escapeHtml(loc)+'</p>'+
+      reminderCardHtml()+
+      '<div class="stat-grid">'+
+        feature("Crop", farmer.crop ? (farmer.crop+" \u00b7 "+farmer.growthStage) : "Not added")+
+        feature("Water", farmer.water||"Not added")+
+        feature("Soil", farmer.soil||"Not specified")+
+        feature("Farm size", farmer.farmSize ? (farmer.farmSize+" "+farmer.unit) : "Not added")+
+      '</div>'+
+      '<div class="dash-actions">'+
+        '<button class="btn primary" data-action="nav" data-screen="talk">Talk to KrishMitra</button>'+
+        '<button class="btn secondary" data-action="nav" data-screen="vision">Check crop / soil photo</button>'+
+      '</div>'+
+      '<button class="soil-bar" data-action="nav" data-screen="soil">'+
+        '<span class="soil-icon">\ud83e\uddea</span>'+
+        '<span><b>Upload your soil test result</b><small>Soil health, a maintenance plan, and crop options for better yield.</small></span>'+
+        '<span class="soil-arrow">\u2192</span>'+
+      '</button>'+
+      '<button class="soil-bar" data-action="nav" data-screen="expert" style="background:var(--clay-600);">'+
+        '<span class="soil-icon">\ud83e\udd1d</span>'+
+        '<span><b>Talk to an Expert</b><small>Named agricultural experts and the Kisan Call Centre helpline.</small></span>'+
+        '<span class="soil-arrow">\u2192</span>'+
+      '</button>'+
+    '</div>';
+  }
+
+  function talkHtml(){
+    var msgs = state.chat.msgs;
+    var body = msgs.length===0 ? '<div class="empty">Ask about your crop, soil or farm.</div>' :
+      msgs.map(function(m){return '<div class="bubble '+m.role+'">'+escapeHtml(m.content)+'</div>';}).join("");
+    if(state.chat.busy) body += '<div class="bubble assistant">Thinking\u2026</div>';
+    return '<div class="talk screen-enter">'+
+      '<h2>Talk to KrishMitra</h2>'+
+      '<p class="subtitle muted">Your saved crop and locality context is included with your question.</p>'+
+      '<div class="chat" id="chatScroll">'+body+'</div>'+
+      '<form class="composer" id="chatForm">'+
+        '<button type="button" class="mic '+(state.chat.voice?"recording":"")+'" data-action="mic">\ud83c\udf99\ufe0f</button>'+
+        '<input type="text" id="chatInput" placeholder="Ask KrishMitra\u2026" autocomplete="off"/>'+
+        '<button type="submit" class="btn primary" '+(state.chat.busy?"disabled":"")+'>\u2192</button>'+
+      '</form>'+
+    '</div>';
+  }
+
+  function visionHtml(){
+    var v = state.vision;
+    return '<div class="panel screen-enter">'+
+      '<h2>Crop / Soil Check</h2>'+
+      '<p class="subtitle">Upload a clear photo. This is advisory only \u2014 confirm important decisions with a qualified expert.</p>'+
+      '<label class="upload-box">'+
+        '<span class="icon">\ud83d\udcf7</span><span>'+(v.file?"Change photo":"Choose or take a photo")+'</span>'+
+        '<input type="file" id="visionFile" accept="image/jpeg,image/png,image/webp"/>'+
+      '</label>'+
+      (v.file? '<p class="file-name">'+escapeHtml(v.file.name)+'</p>' : '')+
+      (v.error? '<div class="error-box">'+escapeHtml(v.error)+'</div>' : '')+
+      '<button class="btn primary full" data-action="analyze-vision" '+((!v.file||v.busy)?"disabled":"")+'>'+(v.busy?"Analyzing\u2026":"Analyze image")+'</button>'+
+      (v.result && v.sections ?
+        '<div class="result-box"><b>KrishMitra\u2019s read on this image</b>'+escapeHtml(v.sections.general||v.result)+'</div>'+
+        methodBoxesHtml(v.sections)
+        : (v.result ? '<div class="result-box"><b>KrishMitra\u2019s read on this image</b>'+escapeHtml(v.result)+'</div>' : ''))+
+      (v.result? '<button class="btn ghost" data-action="nav" data-screen="expert" style="margin-top:10px;">Not sure? Talk to an expert \u2192</button>' : '')+
+    '</div>';
+  }
+
+  function soilHtml(){
+    var s = state.soil;
+    return '<div class="panel soil-panel screen-enter">'+
+      '<div class="soil-heading"><span class="icon large">\ud83e\uddea</span><div><p class="eyebrow">Soil health + crop fit</p><h2>Upload your soil test result</h2></div></div>'+
+      '<p class="subtitle">KrishMitra will read the report, explain soil health, suggest safe maintenance steps, and note crop options based on the values and your farm context.</p>'+
+      '<label class="upload-box">'+
+        '<span class="icon">\ud83d\udcc4</span><span>'+(s.file?"Change file":"Choose a soil report")+'</span>'+
+        '<input type="file" id="soilFile" accept="image/jpeg,image/png,image/webp,text/plain,text/csv,application/json,.txt,.csv,.json"/>'+
+      '</label>'+
+      (s.file? '<p class="file-name">'+escapeHtml(s.file.name)+'</p>' : '')+
+      (s.error? '<div class="error-box">'+escapeHtml(s.error)+'</div>' : '')+
+      '<button class="btn primary full" data-action="analyze-soil" '+((!s.file||s.busy)?"disabled":"")+'>'+(s.busy?"Reading soil report\u2026":"Check soil health & crop options")+'</button>'+
+      (s.result? '<div class="result-box"><b>KrishMitra soil guidance</b>'+escapeHtml(s.result)+'</div>' : '')+
+      '<p class="disclaimer">Advisory only: test values, season, water availability, local climate, seed variety and expert advice all affect yield.</p>'+
+      '<button class="btn ghost" data-action="nav" data-screen="dash">\u2190 Back to dashboard</button>'+
+    '</div>';
+  }
+
+  function expertInitials(name){
+    var parts = String(name||"").trim().split(/\s+/);
+    var a = parts[0] ? parts[0][0] : "";
+    var b = parts.length>1 ? parts[parts.length-1][0] : "";
+    return (a+b).toUpperCase();
+  }
+
+  function expertCardHtml(x){
+    var telHref = "tel:"+String(x.phone||"").replace(/[^\d+]/g,"");
+    var mailHref = "mailto:"+x.email;
+    return '<div class="expert-card">'+
+      '<div class="expert-avatar">'+expertInitials(x.name)+'</div>'+
+      '<div>'+
+        '<b>'+escapeHtml(x.name)+'</b>'+
+        '<p class="expert-role">'+escapeHtml(x.role)+'</p>'+
+        '<p class="expert-focus">'+escapeHtml(x.focus)+'</p>'+
+        '<div class="expert-contact">'+
+          '<a href="'+telHref+'">\ud83d\udcde '+escapeHtml(x.phone)+'</a>'+
+          '<a href="'+mailHref+'">\u2709\ufe0f '+escapeHtml(x.email)+'</a>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function expertHtml(){
+    return '<div class="panel screen-enter" style="max-width:560px;">'+
+      '<span class="eyebrow-pill">Human backup, always</span>'+
+      '<h2>Talk to an Expert</h2>'+
+      '<p class="subtitle">When an AI answer isn\u2019t confident enough \u2014 or the stakes are high \u2014 reach a qualified person directly.</p>'+
+      '<div class="helpline-card">'+
+        '<b>\ud83c\udf3e Kisan Call Centre (Govt. of India)</b>'+
+        '<p>National, toll-free, in 22 local languages, 6am\u201310pm every day. Call <a href="tel:18001801551">1800-180-1551</a> for any farming query.</p>'+
+      '</div>'+
+      EXPERTS.map(expertCardHtml).join("")+
+      '<p class="expert-note">This is a sample expert directory for demonstration. Replace these entries with your own verified, locally-empanelled agricultural experts before real farmers rely on them.</p>'+
+      '<button class="btn ghost" data-action="nav" data-screen="dash">\u2190 Back to dashboard</button>'+
+    '</div>';
+  }
+
+  /* ---------------- events ---------------- */
+  function wireEvents(){
+    root.querySelectorAll("[data-action]").forEach(function(el){
+      el.addEventListener("click", onAction);
+    });
+    var authForm = document.getElementById("authForm");
+    if(authForm) authForm.addEventListener("submit", onAuthSubmit);
+    var onboardForm = document.getElementById("onboardForm");
+    if(onboardForm) onboardForm.addEventListener("submit", onOnboardSubmit);
+    var chatForm = document.getElementById("chatForm");
+    if(chatForm) chatForm.addEventListener("submit", onChatSubmit);
+    var visionFile = document.getElementById("visionFile");
+    if(visionFile) visionFile.addEventListener("change", function(e){
+      state.vision.file = e.target.files[0]||null;
+      state.vision.result=""; state.vision.error=""; state.vision.sections=null;
+      render();
+    });
+    var soilFile = document.getElementById("soilFile");
+    if(soilFile) soilFile.addEventListener("change", function(e){
+      state.soil.file = e.target.files[0]||null;
+      state.soil.result=""; state.soil.error="";
+      render();
+    });
+    var stateSelect = document.getElementById("stateSelect");
+    if(stateSelect) stateSelect.addEventListener("change", function(e){
+      var distSel = document.getElementById("districtSelect");
+      if(distSel) distSel.innerHTML = districtOptionsHtml(e.target.value, "");
+    });
+    var quickLangSelect = document.getElementById("quickLangSelect");
+    if(quickLangSelect) quickLangSelect.addEventListener("change", function(e){
+      state.farmer.language = e.target.value;
+      saveFarmer();
+      render();
+    });
+    var chatScroll = document.getElementById("chatScroll");
+    if(chatScroll) chatScroll.scrollTop = chatScroll.scrollHeight;
+  }
+
+  function onAction(e){
+    var el = e.currentTarget;
+    var action = el.getAttribute("data-action");
+    if(action==="toggle-menu"){ state.menuOpen = !state.menuOpen; render(); }
+    else if(action==="close-menu"){ state.menuOpen=false; render(); }
+    else if(action==="nav"){
+      state.menuOpen=false; state.notice="";
+      var scr = el.getAttribute("data-screen");
+      if(scr==="onboard") state.step = 1;
+      state.screen = scr;
+      render();
+      if(scr==="dash" || scr==="demo") maybeFetchWeather();
+    }
+    else if(action==="reminder-water"){ state.reminder.status="watered"; saveReminder(); render(); }
+    else if(action==="reminder-skip"){ state.reminder.status="skipped"; saveReminder(); render(); }
+    else if(action==="reminder-postpone"){ state.reminder.status="postponed"; state.reminder.postponedAt=Date.now(); saveReminder(); render(); }
+    else if(action==="reminder-undo"){ state.reminder.status=null; saveReminder(); render(); }
+    else if(action==="toggle-theme"){ state.theme = state.theme==="dark"?"light":"dark"; saveTheme(); render(); }
+    else if(action==="go-auth"){ state.notice=""; state.screen="auth"; render(); }
+    else if(action==="logout"){
+      state.farmer = Object.assign({},BLANK_FARMER);
+      try{ localStorage.removeItem("km_farmer_v1"); }catch(e){}
+      state.screen="home"; render();
+    }
+    else if(action==="open-settings"){ state.settingsOpen=true; state.menuOpen=false; render(); }
+    else if(action==="close-settings"){ state.settingsOpen=false; render(); }
+    else if(action==="save-settings"){
+      state.settingsOpen=false; render();
+    }
+    else if(action==="onboard-back"){ state.step = Math.max(1,state.step-1); render(); }
+    else if(action==="locate"){ doLocate(); }
+    else if(action==="mic"){ doMic(); }
+    else if(action==="analyze-vision"){ analyzeVision(); }
+    else if(action==="analyze-soil"){ analyzeSoil(); }
+  }
+
+  function onAuthSubmit(e){
+    e.preventDefault();
+    var name = document.getElementById("authName").value.trim();
+    if(!name){ state.notice="Please enter your name."; render(); return; }
+    state.farmer.name = name;
+    state.notice="";
+    if(state.farmer.onboardingComplete){ state.screen="dash"; }
+    else { state.step=1; state.screen="onboard"; }
+    saveFarmer();
+    render();
+  }
+
+  var REQUIRED = {1:["language"],2:["name","age"],3:["state","district","mandal","village","pin"],4:["farmSize","irrigation","water"],5:["crop","growthStage"]};
+  function onOnboardSubmit(e){
+    e.preventDefault();
+    var form = e.target;
+    var data = new FormData(form);
+    data.forEach(function(v,k){ state.farmer[k]=v; });
+    var missing = (REQUIRED[state.step]||[]).find(function(k){ return !String(state.farmer[k]||"").trim(); });
+    if(missing){ state.notice="Please complete all required fields before continuing."; render(); return; }
+    state.notice="";
+    if(state.step<5){ state.step++; render(); return; }
+    state.farmer.onboardingComplete = true;
+    saveFarmer();
+    state.screen="dash";
+    render();
+  }
+
+  function doLocate(){
+    if(!navigator.geolocation){ state.notice="GPS is unavailable. Enter your locality manually."; render(); return; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      state.farmer.latitude = pos.coords.latitude;
+      state.farmer.longitude = pos.coords.longitude;
+      state.notice = "Location captured. Please complete the locality fields.";
+      render();
+    }, function(){
+      state.notice = "GPS permission was denied. You can continue with manual locality details.";
+      render();
+    });
+  }
+
+  function doMic(){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ alert("Speech recognition is not supported by this browser."); return; }
+    var rec = new SR();
+    rec.lang = SPEECH_LANG_CODES[state.farmer.language] || "en-IN";
+    rec.onstart = function(){ state.chat.voice=true; render(); };
+    rec.onresult = function(ev){
+      var input = document.getElementById("chatInput");
+      if(input) input.value = ev.results[0][0].transcript;
+    };
+    rec.onerror = function(){ alert("Microphone permission or speech recognition failed."); };
+    rec.onend = function(){ state.chat.voice=false; render(); };
+    rec.start();
+  }
+
+  /* ---------------- KrishMitra AI calls (direct, in-browser, no server) ---------------- */
+  function requireKey(){ return true; }
+
+  function contextSummary(f){
+    return JSON.stringify({
+      language:f.language,
+      locality:[f.village,f.district,f.state].filter(Boolean).join(", "),
+      crop:f.crop,
+      growthStage:f.growthStage,
+      farmSize:f.farmSize,
+      irrigation:f.irrigation,
+      water:f.water,
+      soil:f.soil
+    });
+  }
+
+  /* ---------------- AI proxy config ----------------
+     Browsers can never call api.anthropic.com directly with a real key
+     (the key would be exposed to everyone who views page source, and
+     the API blocks cross-origin browser calls anyway). So this app
+     calls a small serverless proxy YOU deploy, which holds the real
+     Anthropic API key server-side and forwards the request.
+     Paste your deployed proxy URL below before hosting this app. */
+  var CLAUDE_PROXY_URL = "https://YOUR-WORKER-SUBDOMAIN.workers.dev/";
+
+  function callClaude(systemText, messages){
+    return fetch(CLAUDE_PROXY_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:1000,
+        system:systemText,
+        messages:messages
+      })
+    }).then(function(r){
+      return r.json().then(function(data){
+        if(!r.ok) throw new Error((data && data.error && data.error.message) || "AI request failed.");
+        return data;
+      });
+    });
+  }
+
+  function extractReply(data){
+    if(!data || !data.content) return "";
+    return data.content.filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n").trim();
+  }
+
+  function dataUrlParts(dataUrl){
+    var m = /^data:([^;]+);base64,(.*)$/.exec(dataUrl||"");
+    return m ? {mediaType:m[1], data:m[2]} : null;
+  }
+
+  function onChatSubmit(e){
+    e.preventDefault();
+    var input = document.getElementById("chatInput");
+    var text = input.value.trim();
+    if(!text || state.chat.busy) return;
+    if(!requireKey()) return;
+    input.value="";
+    state.chat.msgs.push({role:"user",content:text});
+    state.chat.busy=true;
+    render();
+    var history = state.chat.msgs.slice(-12).map(function(m){return {role:m.role,content:m.content};});
+    var lang = state.farmer.language || "English";
+    var sys = "You are KrishMitra, a careful agricultural assistant. Be friendly and practical. "+
+      "ALWAYS write your entire reply in "+lang+", in a natural, conversational, farmer-friendly register (not overly formal or technical), regardless of what script or language the farmer's own message uses. Only switch to a different language if the farmer explicitly asks you to reply in that other language. "+
+      "Use the supplied farm context. Do not invent local facts, diagnoses, pesticide doses, weather, or certainty. If symptoms are uncertain or consequences are important, recommend a qualified agricultural expert. Farmer context: "+contextSummary(state.farmer);
+    callClaude(sys, history).then(function(data){
+      var reply = extractReply(data);
+      state.chat.msgs.push({role:"assistant",content: reply || "The AI provider returned no answer."});
+    }).catch(function(err){
+      state.chat.msgs.push({role:"assistant",content: "Could not reach the AI: "+err.message});
+    }).finally(function(){
+      state.chat.busy=false; render();
+    });
+  }
+
+  function fileToDataUrl(file){
+    return new Promise(function(resolve,reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(String(reader.result)); };
+      reader.onerror = function(){ reject(reader.error); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function analyzeVision(){
+    var v = state.vision;
+    if(!v.file) return;
+    if(!requireKey()) return;
+    v.busy=true; v.result=""; v.error=""; render();
+    fileToDataUrl(v.file).then(function(dataUrl){
+      var parts = dataUrlParts(dataUrl);
+      var lang = state.farmer.language || "English";
+      var sys = "You are KrishMitra's agricultural image assistant. Assess only visible clues. Do not claim a definitive disease diagnosis. Explain uncertainty and recommend qualified human agricultural support when needed. Never invent specific product brand names or exact doses \u2014 describe active-ingredient classes and general practice instead, and tell the farmer to confirm exact product and dose with a local expert or input dealer. ALWAYS write your entire reply in "+lang+", in plain, farmer-friendly language.";
+      var formatInstructions = "Structure your ENTIRE reply using EXACTLY these four section markers, each on its own line, in this order, with nothing before the first marker and nothing after the last section's content:\n\n"+
+        "### CROP ASSESSMENT ###\n"+
+        "(Describe visible signs, likely issue(s), what information is missing, and when expert support is appropriate. End this section with a short 'Tips to improve crop health' list of safe, general steps for this week.)\n\n"+
+        "### PESTICIDE METHOD ###\n"+
+        "(If a pest/disease issue is visible: general chemical/pesticide control approach \u2014 the type or class of pesticide/fungicide typically used for this kind of problem, timing, and safety precautions such as PPE, pre-harvest interval, and label instructions. If no pest/disease is visible, say so briefly.)\n\n"+
+        "### ORGANIC METHOD ###\n"+
+        "(Purely organic/non-chemical alternative for the same issue \u2014 e.g. neem-based sprays, biocontrol agents, cultural practices, traps, botanical extracts \u2014 with general application guidance.)\n\n"+
+        "### COMBINED METHOD ###\n"+
+        "(A practical integrated pest management approach that blends organic-first practices with judicious, minimal pesticide use when needed \u2014 explain the sequencing/logic.)\n\n"+
+        "Keep each section concise and practical. Never give exact chemical trade names or precise dosages \u2014 always point to confirming exact product/dose with a local agricultural expert or licensed input dealer before applying anything.";
+      var userContent = [
+        {type:"text",text:"Analyze this crop or soil image.\n\n"+formatInstructions+"\n\nFarmer context: "+contextSummary(state.farmer)}
+      ];
+      if(parts) userContent.push({type:"image",source:{type:"base64",media_type:parts.mediaType,data:parts.data}});
+      return callClaude(sys, [{role:"user",content:userContent}]);
+    }).then(function(data){
+      var full = extractReply(data) || "The AI provider returned no analysis.";
+      v.result = full;
+      v.sections = parseMethodSections(full);
+    }).catch(function(err){
+      v.error = "Could not analyze this image: "+err.message;
+      v.sections = null;
+    }).finally(function(){
+      v.busy=false; render();
+    });
+  }
+
+  function parseMethodSections(text){
+    if(!text) return null;
+    var markers = [
+      {key:"general", re:/#{2,3}\s*CROP ASSESSMENT\s*#{2,3}/i},
+      {key:"pesticide", re:/#{2,3}\s*PESTICIDE METHOD\s*#{2,3}/i},
+      {key:"organic", re:/#{2,3}\s*ORGANIC METHOD\s*#{2,3}/i},
+      {key:"combined", re:/#{2,3}\s*COMBINED METHOD\s*#{2,3}/i}
+    ];
+    var found = [];
+    markers.forEach(function(m){
+      var match = m.re.exec(text);
+      if(match) found.push({key:m.key, index:match.index, end:match.index+match[0].length});
+    });
+    if(found.length===0) return null;
+    found.sort(function(a,b){ return a.index-b.index; });
+    var sections = {};
+    for(var i=0;i<found.length;i++){
+      var start = found[i].end;
+      var end = (i+1<found.length) ? found[i+1].index : text.length;
+      sections[found[i].key] = text.slice(start,end).trim();
+    }
+    return sections;
+  }
+
+  function methodBoxesHtml(sections){
+    if(!sections) return "";
+    var boxes = [
+      {key:"pesticide", cls:"pesticide", tag:"Pesticide method", title:"\ud83e\uddea Pesticide (chemical) method"},
+      {key:"organic", cls:"organic", tag:"Organic method", title:"\ud83c\udf3f Organic method"},
+      {key:"combined", cls:"combined", tag:"Pesticide + Organic", title:"\u2696\ufe0f Combined (integrated) method"}
+    ];
+    var out = "";
+    boxes.forEach(function(b){
+      if(sections[b.key]){
+        out += '<div class="method-box '+b.cls+'">'+
+          '<div class="method-title"><span class="method-tag">'+b.tag+'</span>'+b.title+'</div>'+
+          '<div class="method-body">'+escapeHtml(sections[b.key])+'</div>'+
+        '</div>';
+      }
+    });
+    return out ? '<div class="method-stack">'+out+'</div>' : "";
+  }
+
+  function analyzeSoil(){
+    var s = state.soil;
+    if(!s.file) return;
+    if(!requireKey()) return;
+    var isImage = s.file.type.indexOf("image/")===0;
+    var isText = s.file.type==="text/plain"||s.file.type==="text/csv"||s.file.type==="application/json"||/\.(txt|csv|json)$/i.test(s.file.name);
+    if(!isImage && !isText){
+      s.error="Please upload a JPG, PNG, WebP, CSV, TXT, or JSON soil report.";
+      render(); return;
+    }
+    s.busy=true; s.result=""; s.error=""; render();
+    var prep = isImage ? fileToDataUrl(s.file).then(function(url){return {dataUrl:url};})
+                        : s.file.text().then(function(t){return {text:t};});
+    prep.then(function(payload){
+      var reportText = payload.text ? payload.text.trim() : "The report is attached as an image.";
+      var prompt = "Analyze this soil test result for a farmer. Use only values visible in the uploaded report and clearly say when a value is missing or uncertain.\n\n"+
+        "Return a practical report with these headings:\n1. Soil health summary\n2. Important nutrients and what they mean\n3. Tips to make your soil healthy again (concrete, actionable steps \u2014 organic matter, crop rotation, amendments to ask a local expert about, irrigation/drainage practices)\n4. Crops likely to perform well and why\n5. Next steps and when to consult a local soil/agriculture expert\n\n"+
+        "Do not invent lab values, guaranteed yields, fertilizer doses, or local weather. Crop suggestions must be framed as options that also depend on water, season, seed variety, and local advice.\n\n"+
+        "File: "+s.file.name+"\nFarmer context: "+contextSummary(state.farmer)+"\nExtracted report text:\n"+reportText;
+      var lang = state.farmer.language || "English";
+      var sys = "You are a careful soil-health agronomist assistant. Give educational, non-definitive guidance and preserve uncertainty. ALWAYS write your entire reply in "+lang+", in plain, farmer-friendly language.";
+      var content = [{type:"text",text:prompt}];
+      if(payload.dataUrl){
+        var parts = dataUrlParts(payload.dataUrl);
+        if(parts) content.push({type:"image",source:{type:"base64",media_type:parts.mediaType,data:parts.data}});
+      }
+      return callClaude(sys, [{role:"user",content:content}]);
+    }).then(function(data){
+      s.result = extractReply(data) || "The AI provider returned no soil analysis.";
+    }).catch(function(err){
+      s.error = "Could not analyze this report: "+err.message;
+    }).finally(function(){
+      s.busy=false; render();
+    });
+  }
+
+  /* ---------------- weather + watering reminder ---------------- */
+  function geocodeLocality(f){
+    var q = [f.village,f.district,f.state,"India"].filter(Boolean).join(", ");
+    if(!q) return Promise.resolve(null);
+    return fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name="+encodeURIComponent(q))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.results && d.results[0]) return {lat:d.results[0].latitude, lon:d.results[0].longitude};
+        return null;
+      }).catch(function(){ return null; });
+  }
+
+  function getCoords(f){
+    if(f.latitude && f.longitude) return Promise.resolve({lat:f.latitude, lon:f.longitude});
+    return geocodeLocality(f);
+  }
+
+  function maybeFetchWeather(){
+    var w = state.weather;
+    if(w.loading) return;
+    var fresh = w.fetchedAt && (Date.now()-w.fetchedAt < 3*60*60*1000);
+    if(w.data && fresh) return;
+    var f = state.farmer;
+    if(!f || !f.name) return;
+    w.loading = true; w.error=""; render();
+    getCoords(f).then(function(coords){
+      if(!coords) throw new Error("no-location");
+      return fetch("https://api.open-meteo.com/v1/forecast?latitude="+coords.lat+"&longitude="+coords.lon+
+        "&daily=precipitation_sum,precipitation_probability_max,temperature_2m_max&timezone=auto&forecast_days=1")
+        .then(function(r){ return r.json(); });
+    }).then(function(data){
+      w.data = data; w.fetchedAt = Date.now();
+    }).catch(function(){
+      w.error = "unavailable";
+    }).finally(function(){
+      w.loading = false; render();
+    });
+  }
+
+  function wateringAdvice(){
+    var w = state.weather;
+    if(!w.data || !w.data.daily) return null;
+    var precip = (w.data.daily.precipitation_sum && w.data.daily.precipitation_sum[0]) || 0;
+    var prob = (w.data.daily.precipitation_probability_max && w.data.daily.precipitation_probability_max[0]) || 0;
+    if(precip>=2 || prob>=60){
+      return "Rain looks likely today ("+Math.round(prob)+"% chance, ~"+precip+"mm). You can probably skip watering \u2014 recheck tomorrow.";
+    }
+    return "Little to no rain expected today. Consider watering your "+(state.farmer.crop||"crop")+" if the soil feels dry.";
+  }
+
+  function reminderCardHtml(){
+    var r = state.reminder, w = state.weather;
+    var body;
+    if(w.loading) body = "Checking today's weather\u2026";
+    else if(w.error) body = "Couldn't fetch local weather right now, but here's your reminder for today.";
+    else { var a = wateringAdvice(); body = a || "Add your locality (or use \u2018Use my current location\u2019 in My Farm) for weather-based watering guidance."; }
+
+    var statusLine = "";
+    if(r.status==="watered") statusLine = '<p class="muted" style="margin-top:8px;">\u2713 Marked as watered today. <button class="btn ghost" data-action="reminder-undo" style="padding:0;">Undo</button></p>';
+    else if(r.status==="skipped") statusLine = '<p class="muted" style="margin-top:8px;">Skipped for today. <button class="btn ghost" data-action="reminder-undo" style="padding:0;">Undo</button></p>';
+    else if(r.status==="postponed") statusLine = '<p class="muted" style="margin-top:8px;">Postponed \u2014 we\u2019ll remind you again later today when you reopen the app.</p>';
+
+    var actions = r.status ? "" :
+      '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">'+
+        '<button class="btn secondary" data-action="reminder-water" style="padding:8px 14px;font-size:13px;">Mark watered</button>'+
+        '<button class="btn secondary" data-action="reminder-postpone" style="padding:8px 14px;font-size:13px;">Postpone</button>'+
+        '<button class="btn ghost" data-action="reminder-skip" style="padding:8px 14px;font-size:13px;">Skip for today</button>'+
+      '</div>';
+
+    return '<div class="feature-card" style="margin-bottom:16px;">'+
+      '<b>\ud83d\udca7 Watering reminder</b>'+
+      '<p>'+escapeHtml(body)+'</p>'+
+      statusLine+actions+
+    '</div>';
+  }
+
+  /* ---------------- boot ---------------- */
+  render();
+  setTimeout(function(){
+    state.booting=false;
+    if(state.farmer && state.farmer.name){
+      state.screen = state.farmer.onboardingComplete ? "dash" : "onboard";
+    }
+    render();
+    if(state.screen==="dash") maybeFetchWeather();
+  }, 2300);
+
+})();
+</script>
+</body>
+</html>
