@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "0ccef458-krishmitra",
+  "name": "krishmitra",
   "main": "src/worker.js",
   "compatibility_date": "2026-09-04",
   "assets": {
